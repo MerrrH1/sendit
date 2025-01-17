@@ -1,4 +1,4 @@
-import datetime
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -15,16 +15,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
     
-def get_tracking_number():
-    dt = datetime.datetime.now()
-    year = str(dt.year).zfill(2)
-    month = str(dt.month).zfill(2)
-    day = str(dt.day).zfill(2)
-    hour = str(dt.hour).zfill(2)
-    minute = str(dt.minute).zfill(2)
-    second = str(dt.second).zfill(2)
-    return "SI-0" + year[2:4] + month + day + hour + minute + second
-    
 class Shipment(models.Model):
     status_choices = (
         ('pending', 'Pending'),
@@ -35,7 +25,7 @@ class Shipment(models.Model):
         ('paid','Paid'),
         ('unpaid', 'Unpaid')
     )
-    tracking_number = models.CharField(max_length = 20, default = get_tracking_number, editable = False, unique = True)
+    tracking_number = models.UUIDField(default = uuid.uuid4, editable = False, unique = True)
     sender = models.CharField(max_length = 50, blank = True, null = True)
     receiver = models.CharField(max_length = 50, blank = True, null = True)
     courier = models.ForeignKey(User, related_name = "courier_shipment", blank = True, null = True, on_delete = models.SET_NULL)
