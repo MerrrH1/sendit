@@ -38,7 +38,7 @@ class Shipment(models.Model):
     last_modified = models.DateTimeField(auto_now = True)
     
     def __str__(self):
-        return f"Shipment {self.tracking_number} - {self.status} - {self.ac}"
+        return f"Shipment {self.tracking_number} - {self.status}"
     
 class Payment(models.Model):
     payment_status = (
