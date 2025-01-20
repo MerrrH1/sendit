@@ -15,16 +15,13 @@ class LoginSerializer(serializers.ModelSerializer):
         username = data.get('username')
         password = data.get('password')
 
-        # Autentikasi dengan model User kustom
         user = authenticate(username=username, password=password)
         
         if user is None:
             raise serializers.ValidationError("Username atau Password salah.")
 
-        # Dapatkan atau buat token
         token, created = Token.objects.get_or_create(user=user)
 
-        # Kirimkan token sebagai bagian dari data yang valid
         data['token'] = token.key
         return data
 
