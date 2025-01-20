@@ -1,12 +1,11 @@
 from django.urls import path, include
 from api import views
 from rest_framework.urlpatterns import format_suffix_patterns
-from api.views import UserListView, RegisterUserView, LoginView, ShipmentListView, ShipmentDetailView, PaymentListView, PaymentDetailView, ReviewtListView, ReviewDetailView, LogoutView
+from api.views import UserListView, LoginView, ShipmentListView, ShipmentDetailView, PaymentListView, PaymentDetailView, ReviewtListView, ReviewDetailView, LogoutView
 
 app_name = 'api'
 
 urlpatterns = [
-    path('api/register', views.RegisterUserView.as_view()),
     path('api/login', views.LoginView.as_view()),
     path('api/logout', views.LogoutView.as_view()),
     path('api/user', views.UserListView.as_view()),

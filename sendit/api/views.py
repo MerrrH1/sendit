@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework.response import Response
 from sendit_app.models import User, Shipment, Payment, Review
-from api.serializers import UserSerializer, RegisterUserSerializer, LoginSerializer, ShipmentSerializer, ReviewSerializer, PaymentSerializer
+from api.serializers import UserSerializer, LoginSerializer, ShipmentSerializer, ReviewSerializer, PaymentSerializer
 from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import login as django_login, logout as django_logout
@@ -12,47 +12,47 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .paginators import CustomPagination
 
-class RegisterUserView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = RegisterUserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                "message": "Pendaftaran berhasil.",
-                "data": serializer.data
-            }, status=status.HTTP_201_CREATED)
-        return Response({
-            "message": "Pendaftaran gagal.",
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
+        
         if serializer.is_valid():
-            user = serializer.validated_data['user']
-            django_login(request, user)  # Login the user using Django's login method
-            return Response({
-                "message": "Login berhasil.",
-                "user": {
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name
-                }
-            }, status=status.HTTP_200_OK)
-        return Response({
-            "message": "Login gagal.",
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    'status': 'success',
+                    'message': 'Login berhasil',
+                    'token': serializer.validated_data['token']
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
-        django_logout(request)
-        return Response({
-            "message": "Logout berhasil."
-        }, status=status.HTTP_200_OK)
+        try:
+            # Ambil token dari header Authorization
+            token = request.auth  # `request.auth` adalah token yang digunakan oleh user yang terautentikasi
+
+            # Hapus token untuk logout
+            token.delete()
+
+            return Response(
+                {'message': 'Logout berhasil'},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {'message': 'Gagal melakukan logout', 'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
 class UserListView(APIView):
     def get(self, request, *args, **kwargs):
