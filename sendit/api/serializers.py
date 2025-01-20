@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from sendit_app.models import User, Shipment
+from sendit_app.models import User, Shipment, Payment, Review
 
 from django.contrib.auth import authenticate
 from rest_framework.validators import UniqueValidator
@@ -48,26 +48,39 @@ class LoginSerializer(serializers.ModelSerializer):
         password = data.get('password', '')
         
         if username and password:
-            user = authenticate(username = username, password = password)
-            if user:
-                if user.is_active:
-                    data['user'] = user
-                else:
-                    msg = "Status pengguna tidak aktif..."
-                    raise ValidationError({'message' : msg})
-            else:
-                msg = "Anda tidak memiliki akses masuk..."
-                raise ValidationError({'message' : msg})
+            user = authenticate(request=self.context.get('request'), username=username, password=password)
+            if not user:
+                msg = 'Unable to log in with provided credentials.'
+                raise serializers.ValidationError(msg, code='authorization')
         else:
             msg = "Mohon mengisi kolom username dan password..."
             raise ValidationError({'message' : msg})
+        data['user'] = user
         return data
     
     class Meta:
         model = User
         fields = ['username', 'password']
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
 class ShipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shipment
         fields = "__all__"
+        
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = "__all__"
+        
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = "__all__"
+        
+
